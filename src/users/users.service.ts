@@ -10,13 +10,15 @@ export class UsersService {
     return prisma.user.findUnique({ where: { email } });
   }
   async create(email: string, password: string, name: string) {
-    const hash = await bcrypt.hash(password, 10);
-    return prisma.user.create({ data: { email, password: hash, name } });
+    const passwordHash = await bcrypt.hash(password, 10);
+    return prisma.user.create({ 
+      data: { email, passwordHash, name } 
+    });
   }
   async validateUser(email: string, password: string) {
     const user = await this.findByEmail(email);
     if (!user) return null;
-    const valid = await bcrypt.compare(password, user.password);
+    const valid = await bcrypt.compare(password, user.passwordHash || '');
     return valid ? user : null;
   }
 }
