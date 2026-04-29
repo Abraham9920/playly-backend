@@ -1,26 +1,46 @@
-import { Controller, Get, Post, Body, Param, UseGuards, Request } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Headers,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { GamesService } from './games.service';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { JwtService } from '@nestjs/jwt';
 
 @Controller('games')
 export class GamesController {
-  constructor(private svc: GamesService) {}
+  constructor(
+    private svc: GamesService,
+    private jwt: JwtService,
+  ) {}
 
-  @Get()
-  findAll() { return this.svc.findAll(); }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) { return this.svc.findOne(id); }
-
-  @UseGuards(JwtAuthGuard)
-  @Post()
-  create(@Body() body: any, @Request() req: any) {
-    return this.svc.create(body, req.user.id);
+  private getUserId(auth: string) {
+    if (!auth) throw new UnauthorizedException();
+    const token = auth.replace('Bearer ', '');
+    const payload: any = this.jwt.decode(token);
+    return payload.sub;
   }
 
-  @UseGuards(JwtAuthGuard)
+  @Get()
+  findAll() {
+    return this.svc.findAll();
+  }
+
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.svc.findOne(id);
+  }
+
+  @Post()
+  create(@Body() body: any, @Headers('authorization') auth: string) {
+    return this.svc.create(body, this.getUserId(auth));
+  }
+
   @Post(':id/join')
-  join(@Param('id') id: string, @Request() req: any) {
-    return this.svc.join(id, req.user.id);
+  join(@Param('id') id: string, @Headers('authorization') auth: string) {
+    return this.svc.join(id, this.getUserId(auth));
   }
 }

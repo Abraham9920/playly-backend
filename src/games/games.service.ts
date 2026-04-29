@@ -1,30 +1,27 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 @Injectable()
 export class GamesService {
-  constructor(private prisma: PrismaService) {}
-
   findAll() {
-    return this.prisma.game.findMany({
-      include: { host: { select: { id: true, name: true } }, venue: true },
+    return prisma.game.findMany({
+      include: { host: { select: { id: true, name: true } } },
       orderBy: { createdAt: 'desc' },
     });
   }
 
   findOne(id: string) {
-    return this.prisma.game.findUnique({
-      where: { id },
-      include: { host: { select: { id: true, name: true } }, venue: true, bookings: true },
-    });
+    return prisma.game.findUnique({ where: { id } });
   }
 
   create(data: any, hostId: string) {
-    return this.prisma.game.create({
+    return prisma.game.create({
       data: {
         title: data.title,
         sport: data.sport,
-        skillLevel: data.level || data.skillLevel || 'Casual',
+        skillLevel: data.level || 'Casual',
         startsAt: data.scheduledAt ? new Date(data.scheduledAt) : new Date(),
         duration: data.duration || 60,
         maxPlayers: data.maxPlayers || 10,
@@ -34,7 +31,14 @@ export class GamesService {
     });
   }
 
-  async join(  async join(  async join(  async join(  ase   async join(  async join(  async join(  async join(  aslud  async jongs:  async join(  async!game) t  async join(  async join(  async join(  async.bo  async jngth   async join(  async join(  async joiGa  async join(  async join(  async join(  async join(  ase   async join(  a: id, userId, amountPaid: game.pricePerPlayer },
+  async join(id: string, userId: string) {
+    const game = await prisma.game.findUnique({
+      where: { id },
+      include: { bookings: true },
+    });
+    if (!game) throw new Error('Game not found');
+    return prisma.booking.create({
+      data: { gameId: id, userId, amountPaid: game.pricePerPlayer },
     });
   }
 }
