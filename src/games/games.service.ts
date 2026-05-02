@@ -17,16 +17,17 @@ export class GamesService {
   }
 
   create(data: any, hostId: string) {
+    console.log('hostId from token:', hostId);
     return prisma.game.create({
       data: {
         title: data.title,
         sport: data.sport,
-        skillLevel: data.level || 'Casual',
+        skillLevel: data.level || data.skillLevel || 'Casual',
         startsAt: data.scheduledAt ? new Date(data.scheduledAt) : new Date(),
         duration: data.duration || 60,
         maxPlayers: data.maxPlayers || 10,
         pricePerPlayer: data.price || 0,
-        hostId,
+        hostId: hostId,
       },
     });
   }
