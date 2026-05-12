@@ -47,8 +47,8 @@ model Game {
   maxPlayers     Int
   pricePerPlayer Float     @default(0)
   status         String    @default("OPEN")
-  hostId         String
-  host           User      @relation(fields: [hostId], references: [id])
+  hostId         String?
+  host           User?      @relation(fields: [hostId], references: [id])
   venueId        String?
   venue          Venue?    @relation(fields: [venueId], references: [id])
   bookings       Booking[]

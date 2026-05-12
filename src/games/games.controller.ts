@@ -19,8 +19,10 @@ export class GamesController {
 
   private getUserId(auth: string) {
     if (!auth) throw new UnauthorizedException();
-    const token = auth.replace('Bearer ', '');
+    const token = auth.replace('Bearer ', '').trim();
     const payload: any = this.jwt.decode(token);
+    console.log('JWT payload:', JSON.stringify(payload));
+    if (!payload || !payload.sub) throw new UnauthorizedException();
     return payload.sub;
   }
 

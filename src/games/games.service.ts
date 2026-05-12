@@ -7,15 +7,24 @@ const prisma = new PrismaClient();
 export class GamesService {
   findAll() {
     return prisma.game.findMany({
-      include: { host: { select: { id: true, name: true } } },
-      orderBy: { createdAt: 'desc' },
+      include: {
+        host: { select: { id: true, name: true } },
+        venue: {
+          select: {
+            id: true,
+            name: true,
+            neighborhood: true,
+            lat: true,
+            lng: true,
+          },
+        },
+      },
+      orderBy: { startsAt: 'asc' },
     });
   }
-
   findOne(id: string) {
     return prisma.game.findUnique({ where: { id } });
   }
-
   create(data: any, hostId: string) {
     console.log('hostId from token:', hostId);
     return prisma.game.create({
