@@ -48,6 +48,10 @@ export class GamesService {
         include: { bookings: true },
       });
       if (!game) throw new Error('Game not found');
+
+      const alreadyJoined = game.bookings.some((b) => b.userId === userId);
+      if (alreadyJoined) throw new Error('Already joined');
+
       return await prisma.booking.create({
         data: { gameId: id, userId, amountPaid: game.pricePerPlayer },
       });
