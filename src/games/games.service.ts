@@ -22,9 +22,11 @@ export class GamesService {
       orderBy: { startsAt: 'asc' },
     });
   }
+
   findOne(id: string) {
     return prisma.game.findUnique({ where: { id } });
   }
+
   create(data: any, hostId: string) {
     console.log('hostId from token:', hostId);
     return prisma.game.create({
@@ -43,14 +45,13 @@ export class GamesService {
 
   async join(id: string, userId: string) {
     try {
-      const game = await prisma.game.findUnique({
-        where: { id },
-        include: { bookings: true },
+      const existing = await prisma.booking.findFirst({
+        where: { gameId: id, userId },
       });
-      if (!game) throw new Error('Game not found');
+      if (existing) throw new Error('Already joined');
 
-      const alreadyJoined = game.bookings.some((b) => b.userId === userId);
-      if (alreadyJoined) throw new Error('Already joined');
+      const game = await prisma.game.findUnique({ where: { id } });
+      if (!game) throw new Error('Game not found');
 
       return await prisma.booking.create({
         data: { gameId: id, userId, amountPaid: game.pricePerPlayer },
