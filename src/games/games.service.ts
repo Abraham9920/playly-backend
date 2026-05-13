@@ -42,17 +42,18 @@ export class GamesService {
   }
 
   async join(id: string, userId: string) {
-  try {
-    const game = await prisma.game.findUnique({
-      where: { id },
-      include: { bookings: true },
-    });
-    if (!game) throw new Error('Game not found');
-    return await prisma.booking.create({
-      data: { gameId: id, userId, amountPaid: game.pricePerPlayer },
-    });
-  } catch (e: any) {
-    console.error('Join error:', e.message);
-    throw e;
+    try {
+      const game = await prisma.game.findUnique({
+        where: { id },
+        include: { bookings: true },
+      });
+      if (!game) throw new Error('Game not found');
+      return await prisma.booking.create({
+        data: { gameId: id, userId, amountPaid: game.pricePerPlayer },
+      });
+    } catch (e: any) {
+      console.error('Join error:', e.message);
+      throw e;
+    }
   }
 }
